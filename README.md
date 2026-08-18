@@ -46,13 +46,23 @@ Then in Claude Code:
 
 ## Dashboard
 
-[`docs/dashboard-demo.html`](docs/dashboard-demo.html) is a demo of what a
-`/gym dashboard` command would show once real data exists — this week's
-sessions with deviations and reasons, eight-week progression per lift,
-bodyweight and active constraints from health-skill, and the daily
-recovery-gate decision. Sample data throughout, clearly marked; download and
-open it locally to view. Not yet a real command — needs `/gym setup` to have
-actually run first.
+A demo of what a `/gym dashboard` command would show once real data exists.
+Sample data throughout, clearly marked — not yet a real command, needs
+`/gym setup` to have actually run first.
+
+**Up next** leads with today's session and the recovery-gate decision;
+**logged** sessions show deviations (swaps, skips) inline instead of burying
+them in a full exercise list:
+
+![Training board — up next and logged sessions](docs/dashboard-hero.png)
+
+**Eight-week trends** — progression per lift with RPE, bodyweight and active
+constraints from health-skill, recovery vs. the daily session call:
+
+![Training board — trends](docs/dashboard-trends.png)
+
+Full interactive version (fonts, animation, collapsible cards): download
+[`docs/dashboard-demo.html`](docs/dashboard-demo.html) and open it locally.
 
 ## Watch sync
 
