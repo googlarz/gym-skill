@@ -2,12 +2,16 @@
 name: gym
 description: >
   Personalized strength-training coach. Generates specific progressive-overload
-  programs, logs sessions, and adapts weekly based on Suunto recovery data
-  (HRV, sleep) and health-skill context (injuries, conditions, meds). Data
-  lives in the user's health-skill person folder so training history stays
-  unified with their health record. Use when the user wants to plan gym
-  sessions, log a workout, check what to train today, or review progress.
-  Not for medical advice — persistent pain routes to health-skill triage.
+  programs and adapts them on two axes: BEFORE training, using Suunto recovery
+  data (HRV, sleep) to gate intensity; AFTER training, using what actually
+  happened (weights/reps hit, RPE, PRs, lap-inferred completion from the
+  watch) to decide progress/hold/deload per lift. Cross-checks health-skill
+  context (injuries, conditions, meds) so programming never contradicts what's
+  already known. Data lives in the user's health-skill person folder so
+  training history stays unified with their health record. Use when the user
+  wants to plan gym sessions, log a workout, check what to train today, or
+  review progress. Not for medical advice — persistent pain routes to
+  health-skill triage.
 ---
 
 # Gym
@@ -16,6 +20,21 @@ Specialized strength coach layered on top of the `health-skill` person workspace
 It does NOT duplicate health-skill's generic workout-plan generator — it reuses
 health-skill's storage (workouts, PRs) and adds real progressive-overload
 programming health-skill doesn't do, plus Suunto recovery gating.
+
+## Adaptation loop — before training vs. after training
+
+Two separate axes, don't conflate them:
+
+- **Before training** (`/gym today`): Suunto recovery data (HRV, sleep) gates
+  *intensity for today's session only*. It never changes `PROGRAM.md` itself
+  — a bad-recovery day means "do 70% of today's plan," not "the program is
+  wrong."
+- **After training** (`/gym log` → `/gym review`): actual performance —
+  weight/reps hit, RPE if given, PRs, and lap-inferred completion from the
+  watch — is what drives real programming changes: progress, hold, or
+  deload per lift, written back into `PROGRAM.md`. This is the loop that
+  actually adapts the program long-term; recovery gating only ever adapts a
+  single day.
 
 ## Split
 
@@ -65,7 +84,14 @@ a fixed ~40-exercise bank and isn't specific enough for real strength work.
 4. Write `gym/PROGRAM.md` — a real mesocycle (4-8 weeks), three sessions
    (Upper / Mid / Legs), 12-16 exercises each, with starting weights, sets,
    reps, and a progression rule per lift (e.g. "+2.5kg when all sets hit top
-   of rep range for 2 sessions running").
+   of rep range for 2 sessions running"). Before finalizing any exercise,
+   cross-check it against the injuries/conditions in `HEALTH_PROFILE.json`
+   using the same broad categories health-skill's own exercise bank uses
+   (shoulder, lower back, knee, etc. — see `contra` fields in
+   `~/.claude/skills/health-skill/scripts/training.py`'s `EXERCISE_BANK` for
+   the taxonomy). If a chosen lift plausibly loads an injured area, swap it
+   for an equivalent that doesn't rather than programming around the
+   contradiction silently.
 5. Register the plan in health-skill's schema too, so it shows up in
    health-skill's own dashboard/reports:
    ```
@@ -110,16 +136,25 @@ progression, a deload, an exercise swap).
    - Normal or good recovery → run the session in `PROGRAM.md` as planned.
 3. Show today's session: exercise, sets×reps, target weight (last logged weight
    + progression rule if criteria met, otherwise same weight).
+4. If the user says an exercise/machine/rack isn't available (gym's busy,
+   traveling, home setup missing something): substitute a same-muscle-group
+   alternative on the spot — don't just drop the exercise. Log the swap in
+   `plan-week.md` for that session so `/gym review` sees what was actually
+   trained, not the original plan.
 
 ## `/gym log`
 
-1. Ask what happened if not already given.
+1. Ask what happened if not already given. If the user gives weights/reps
+   without an effort rating, ask how hard the last set felt (RPE 1-10, or
+   "easy/moderate/hard/max effort" translated to a number) — it's the
+   difference between "hit the reps easily" and "barely made it," which
+   changes whether to progress next time.
 2. Call:
    ```
    python3 ~/.claude/skills/health-skill/scripts/care_workspace.py log-workout \
-     --root <root> --person-id <id> --text "<freeform description>"
+     --root <root> --person-id <id> --text "<freeform description, e.g. 'bench 60kg 3x8 RPE 7'>"
    ```
-   This parses exercises/weights/sets/reps and detects PRs automatically.
+   This parses exercises/weights/sets/reps/RPE and detects PRs automatically.
 3. If the user mentions pain (not just soreness) that's new or recurring,
    don't just swap the exercise — flag it into health-skill's review flow
    (this is a medical signal, not a training decision):
@@ -133,11 +168,17 @@ progression, a deload, an exercise swap).
 ## `/gym review`
 
 Weekly. Read the logged workouts (`run-summary` for cardio trend deltas;
-scan `HEALTH_PROFILE.json` workouts for lifts) plus `PROGRAM.md`'s progression
-rules:
+scan `HEALTH_PROFILE.json` workouts for lifts, including `rpe` per exercise
+when present) plus `PROGRAM.md`'s progression rules:
 - Which lifts are progressing, which have stalled 2+ sessions
+- **Autoregulate using RPE when it's available**, not just weight/reps:
+  reps hit + RPE ≤7 → progress. Reps hit but RPE 9-10 (grinding) → hold, even
+  though the rep target was technically met. Reps missed → hold or regress.
+  No RPE logged → fall back to reps-only (the old rule still applies).
 - Volume trend (sets per muscle group per week)
-- Suunto recovery trend for the week (average HRV/sleep vs. prior week)
+- Suunto recovery trend for the week (average HRV/sleep vs. prior week) —
+  for context on *why* a lift stalled, not as the progression trigger itself
+  (that's performance data's job; recovery data's job is the daily gate)
 - Concrete next-week adjustment: hold, progress, or deload — write it into
   `PROGRAM.md` and summarize in one short paragraph, not a wall of stats.
 

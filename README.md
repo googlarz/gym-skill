@@ -1,8 +1,11 @@
 # Gym Skill
 
-A Claude Code skill that plans real strength-training programs, adapts them
-week to week based on your actual recovery data, and pushes them straight to
-your Suunto watch.
+A Claude Code skill that plans real strength-training programs and pushes
+them straight to your Suunto watch. It adapts on two axes: before training,
+your recovery data (HRV, sleep) gates how hard today should be; after
+training, what actually happened — weights and reps hit, effort (RPE), PRs,
+even lap-inferred completion from the watch — decides whether next week
+progresses, holds, or deloads.
 
 Not a generic workout generator — it writes real progressive-overload
 programming (specific exercises, weights, sets, reps, and a progression rule
@@ -38,7 +41,7 @@ Then in Claude Code:
 | `/gym setup` | Interviews you once (goal, equipment, experience, injuries not already in health-skill), writes a real Upper/Mid/Legs program |
 | `/gym plan` | Refreshes the week and pushes all three sessions to your watch |
 | `/gym today` | Checks your recovery, gates intensity if it's poor, shows today's session |
-| `/gym log` | Logs what happened, detects PRs, flags recurring pain to health-skill instead of guessing at it |
+| `/gym log` | Logs what happened including RPE, detects PRs, flags recurring pain to health-skill instead of guessing at it |
 | `/gym review` | Weekly progression check — which lifts are moving, which stalled, next week's adjustment |
 
 ## Watch sync
