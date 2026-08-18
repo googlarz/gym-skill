@@ -44,6 +44,16 @@ Then in Claude Code:
 | `/gym log` | Logs what happened including RPE, detects PRs, flags recurring pain to health-skill instead of guessing at it |
 | `/gym review` | Weekly progression check — which lifts are moving, which stalled, next week's adjustment |
 
+## Dashboard
+
+[`docs/dashboard-demo.html`](docs/dashboard-demo.html) is a demo of what a
+`/gym dashboard` command would show once real data exists — this week's
+sessions with deviations and reasons, eight-week progression per lift,
+bodyweight and active constraints from health-skill, and the daily
+recovery-gate decision. Sample data throughout, clearly marked; download and
+open it locally to view. Not yet a real command — needs `/gym setup` to have
+actually run first.
+
 ## Watch sync
 
 Plan → watch is a real, working loop through the SuuntoPlus Guide API — see
