@@ -50,16 +50,13 @@ A demo of what a `/gym dashboard` command would show once real data exists.
 Sample data throughout, clearly marked — not yet a real command, needs
 `/gym setup` to have actually run first.
 
-**Up next** leads with today's session and the recovery-gate decision;
+**Up next** leads with today's session and the recovery-gate decision,
 **logged** sessions show deviations (swaps, skips) inline instead of burying
-them in a full exercise list:
+them in a full exercise list, and **eight-week trends** cover progression
+per lift with RPE, bodyweight and active constraints from health-skill, and
+recovery vs. the daily session call:
 
-![Training board — up next and logged sessions](docs/dashboard-hero.png)
-
-**Eight-week trends** — progression per lift with RPE, bodyweight and active
-constraints from health-skill, recovery vs. the daily session call:
-
-![Training board — trends](docs/dashboard-trends.png)
+![Training board dashboard](docs/dashboard.png)
 
 Full interactive version (fonts, animation, collapsible cards): download
 [`docs/dashboard-demo.html`](docs/dashboard-demo.html) and open it locally.
